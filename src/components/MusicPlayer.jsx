@@ -1,8 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { 
-  Play, Pause, SkipBack, SkipForward, Volume2, VolumeX, 
-  ListMusic, Shuffle, Repeat, ExternalLink, Sparkles 
-} from 'lucide-react';
+import { Play, Pause, SkipBack, SkipForward, Volume2, VolumeX, ListMusic } from 'lucide-react';
 import { DESH_BHAKTI_SONGS } from '../data/songs';
 import { soundFx } from '../utils/soundEffects';
 import PlaylistDrawer from './PlaylistDrawer';
@@ -16,13 +13,10 @@ export default function MusicPlayer({
   setCurrentTrack 
 }) {
   const [trackIndex, setTrackIndex] = useState(0);
-  const [duration, setDuration] = useState(392);
-  const [volume, setVolume] = useState(90);
+  const [duration, setDuration] = useState(378);
+  const [volume, setVolume] = useState(100);
   const [isMuted, setIsMuted] = useState(false);
-  const [isShuffle, setIsShuffle] = useState(false);
-  const [isRepeat, setIsRepeat] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [showVolumeSlider, setShowVolumeSlider] = useState(false);
 
   const audioRef = useRef(null);
 
@@ -40,6 +34,11 @@ export default function MusicPlayer({
     audio.volume = isMuted ? 0 : volume / 100;
     audio.muted = isMuted;
 
+    // Apply custom startTime if defined (e.g. 2:18 / 138s for Ae Mere Watan Ke Logon)
+    const initialSeekTime = song.startTime || 0;
+    audio.currentTime = initialSeekTime;
+    setCurrentTime(initialSeekTime);
+
     const handleTimeUpdate = () => {
       if (audio.currentTime !== undefined && !isNaN(audio.currentTime)) {
         setCurrentTime(Math.floor(audio.currentTime));
@@ -53,15 +52,14 @@ export default function MusicPlayer({
       if (audio.duration && !isNaN(audio.duration) && audio.duration > 0) {
         setDuration(Math.floor(audio.duration));
       }
+      if (song.startTime && song.startTime > 0) {
+        audio.currentTime = song.startTime;
+        setCurrentTime(song.startTime);
+      }
     };
 
     const handleEnded = () => {
-      if (isRepeat) {
-        audio.currentTime = 0;
-        audio.play();
-      } else {
-        handleNextTrack();
-      }
+      handleNextTrack();
     };
 
     audio.addEventListener('timeupdate', handleTimeUpdate);
@@ -122,15 +120,11 @@ export default function MusicPlayer({
   // Next Track
   const handleNextTrack = () => {
     soundFx.playClick();
-    let nextIdx;
-    if (isShuffle) {
-      nextIdx = Math.floor(Math.random() * DESH_BHAKTI_SONGS.length);
-    } else {
-      nextIdx = (trackIndex + 1) % DESH_BHAKTI_SONGS.length;
-    }
+    const nextIdx = (trackIndex + 1) % DESH_BHAKTI_SONGS.length;
     setTrackIndex(nextIdx);
     setCurrentTrack(DESH_BHAKTI_SONGS[nextIdx]);
-    setCurrentTime(0);
+    const startT = DESH_BHAKTI_SONGS[nextIdx].startTime || 0;
+    setCurrentTime(startT);
     setIsPlaying(true);
   };
 
@@ -140,7 +134,8 @@ export default function MusicPlayer({
     const prevIdx = (trackIndex - 1 + DESH_BHAKTI_SONGS.length) % DESH_BHAKTI_SONGS.length;
     setTrackIndex(prevIdx);
     setCurrentTrack(DESH_BHAKTI_SONGS[prevIdx]);
-    setCurrentTime(0);
+    const startT = DESH_BHAKTI_SONGS[prevIdx].startTime || 0;
+    setCurrentTime(startT);
     setIsPlaying(true);
   };
 
@@ -150,7 +145,8 @@ export default function MusicPlayer({
     if (idx !== -1) {
       setTrackIndex(idx);
       setCurrentTrack(DESH_BHAKTI_SONGS[idx]);
-      setCurrentTime(0);
+      const startT = DESH_BHAKTI_SONGS[idx].startTime || 0;
+      setCurrentTime(startT);
       setIsPlaying(true);
     }
   };
@@ -168,18 +164,6 @@ export default function MusicPlayer({
     }
   };
 
-  // Volume toggle
-  const handleToggleMute = () => {
-    soundFx.playClick();
-    setIsMuted(!isMuted);
-  };
-
-  const handleVolumeChange = (e) => {
-    const newVol = Number(e.target.value);
-    setVolume(newVol);
-    if (isMuted) setIsMuted(false);
-  };
-
   const formatTime = (seconds) => {
     if (!isFinite(seconds) || seconds === null) return "0:00";
     const mins = Math.floor(seconds / 60);
@@ -191,56 +175,47 @@ export default function MusicPlayer({
 
   return (
     <>
-      {/* Saloon.wtf inspired Floating Bottom Glass Capsule Player */}
-      <div className="fixed bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 z-40 w-[94vw] max-w-xl pointer-events-auto">
-        <div className={`group relative flex items-center gap-3 sm:gap-4 rounded-full p-2.5 sm:p-3 pr-4 sm:pr-5 bg-white/10 backdrop-blur-2xl backdrop-saturate-150 border border-white/20 shadow-[0_8px_40px_rgba(0,0,0,0.45),inset_0_1px_0_rgba(255,255,255,0.25)] transition-all hover:border-white/30 hover:bg-white/[0.12] ${
-          isPlaying ? 'shadow-[0_8px_40px_rgba(255,153,51,0.25)] border-orange-400/30' : ''
+      {/* Saloon.wtf Exact Floating Glass Capsule Player at Bottom Viewport */}
+      <div className="fixed bottom-6 sm:bottom-8 left-1/2 -translate-x-1/2 z-40 w-[94vw] max-w-xl pointer-events-auto select-none">
+        <div className={`relative flex items-center gap-3 sm:gap-4 rounded-full p-2.5 sm:p-3 pr-4 sm:pr-5 bg-black/40 backdrop-blur-2xl backdrop-saturate-150 border border-white/20 shadow-[0_12px_50px_rgba(0,0,0,0.65),inset_0_1px_0_rgba(255,255,255,0.25)] transition-all hover:bg-black/50 hover:border-white/30 ${
+          isPlaying ? 'shadow-[0_12px_50px_rgba(255,153,51,0.2)] border-white/30' : ''
         }`}>
           
-          {/* Rotating Vinyl Disc with Center Spindle */}
-          <div className="relative h-14 w-14 sm:h-16 sm:w-16 shrink-0">
+          {/* Rotating Vinyl Record Cover */}
+          <div className="relative h-13 w-13 sm:h-14 sm:w-14 shrink-0">
             <div 
-              className="h-full w-full overflow-hidden rounded-full shadow-lg ring-1 ring-white/20 cursor-pointer"
+              className="h-full w-full overflow-hidden rounded-full shadow-lg ring-1 ring-white/25 cursor-pointer"
               style={{
                 animation: 'spin-slow 8s linear infinite',
                 animationPlayState: isPlaying ? 'running' : 'paused'
               }}
               onClick={() => setIsDrawerOpen(true)}
-              title="Click to view full playlist"
+              title="Click to view all songs"
             >
               <img 
-                src={song.cover} 
+                src={song.cover || '/indian-flag.svg'} 
                 alt={song.title} 
                 className="h-full w-full object-cover"
               />
             </div>
             {/* Center Spindle Hole */}
-            <div className="pointer-events-none absolute left-1/2 top-1/2 h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-black/80 ring-2 ring-white/50 shadow-inner"></div>
+            <div className="pointer-events-none absolute left-1/2 top-1/2 h-2.5 w-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-black ring-1.5 ring-white/60 shadow-inner"></div>
           </div>
 
           {/* Song Info & Seekable Progress Bar */}
           <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-2">
-              <p className="truncate text-sm sm:text-[15px] font-semibold text-white drop-shadow-sm">
-                {song.title}
-              </p>
-              {isPlaying && (
-                <span className="hidden sm:inline-flex items-center gap-0.5 h-3">
-                  <span className="w-0.5 bg-orange-400 eq-bar-1"></span>
-                  <span className="w-0.5 bg-white eq-bar-2"></span>
-                  <span className="w-0.5 bg-emerald-400 eq-bar-3"></span>
-                </span>
-              )}
-            </div>
+            <p className="truncate text-xs sm:text-sm font-semibold text-white drop-shadow-sm">
+              {song.title}
+            </p>
             
-            <p className="truncate text-xs sm:text-[13px] text-white/70">
+            <p className="truncate text-[11px] sm:text-xs text-white/70">
               {song.artist}
             </p>
 
             {/* Seek Bar */}
-            <div className="mt-1.5 sm:mt-2">
+            <div className="mt-1 sm:mt-1.5">
               <div 
-                className="group/bar relative h-2.5 w-full cursor-pointer flex items-center" 
+                className="group/bar relative h-2 w-full cursor-pointer flex items-center" 
                 onClick={handleSeek}
                 role="slider"
                 aria-label="Seek track position"
@@ -248,23 +223,20 @@ export default function MusicPlayer({
                 {/* Background Track */}
                 <div className="absolute inset-x-0 h-1 rounded-full bg-white/20 overflow-hidden">
                   <div 
-                    className="h-full rounded-full bg-gradient-to-r from-orange-400 via-white to-emerald-400 transition-all duration-100" 
+                    className="h-full rounded-full bg-white/90 transition-all duration-100" 
                     style={{ width: `${progressPercentage}%` }}
                   ></div>
                 </div>
-                {/* Thumb Handle */}
+                {/* Handle */}
                 <div 
-                  className="absolute h-3 w-3 -translate-x-1/2 rounded-full bg-white shadow-md opacity-0 transition-opacity group-hover/bar:opacity-100 ring-2 ring-orange-400/50"
+                  className="absolute h-2.5 w-2.5 -translate-x-1/2 rounded-full bg-white shadow-md opacity-0 transition-opacity group-hover/bar:opacity-100"
                   style={{ left: `${progressPercentage}%` }}
                 ></div>
               </div>
 
-              {/* Time Indicators & Badge */}
-              <div className="flex items-center justify-between mt-0.5 text-[10px] sm:text-[11px] tabular-nums text-white/60">
+              {/* Time Indicators */}
+              <div className="flex items-center justify-between text-[10px] tabular-nums text-white/60 mt-0.5">
                 <span>{formatTime(currentTime)} / {formatTime(duration)}</span>
-                <span className="hidden sm:inline text-orange-300/80 font-mono tracking-wider">
-                  {song.tag}
-                </span>
               </div>
             </div>
           </div>
@@ -276,9 +248,9 @@ export default function MusicPlayer({
               type="button" 
               onClick={handlePrevTrack}
               aria-label="Previous track" 
-              className="grid h-8 w-8 sm:h-9 sm:w-9 place-items-center rounded-full text-white/80 transition hover:bg-white/15 hover:text-white active:scale-95 cursor-pointer"
+              className="grid h-8 w-8 place-items-center rounded-full text-white/80 transition hover:bg-white/15 hover:text-white active:scale-95 cursor-pointer"
             >
-              <SkipBack className="w-4 h-4" />
+              <SkipBack className="w-4 h-4 fill-current" />
             </button>
 
             {/* Solid White Circular Play/Pause Button */}
@@ -286,12 +258,12 @@ export default function MusicPlayer({
               type="button" 
               onClick={handleTogglePlay}
               aria-label={isPlaying ? "Pause music" : "Play patriotic music"} 
-              className="grid h-10 w-10 sm:h-11 sm:w-11 place-items-center rounded-full bg-white text-black shadow-lg transition hover:scale-105 active:scale-95 cursor-pointer"
+              className="grid h-9 w-9 sm:h-10 sm:w-10 place-items-center rounded-full bg-white text-black shadow-lg transition hover:scale-105 active:scale-95 cursor-pointer"
             >
               {isPlaying ? (
-                <Pause className="w-5 h-5 fill-current" />
+                <Pause className="w-4 h-4 fill-current" />
               ) : (
-                <Play className="w-5 h-5 fill-current ml-0.5" />
+                <Play className="w-4 h-4 fill-current ml-0.5" />
               )}
             </button>
 
@@ -300,61 +272,17 @@ export default function MusicPlayer({
               type="button" 
               onClick={handleNextTrack}
               aria-label="Next track" 
-              className="grid h-8 w-8 sm:h-9 sm:w-9 place-items-center rounded-full text-white/80 transition hover:bg-white/15 hover:text-white active:scale-95 cursor-pointer"
+              className="grid h-8 w-8 place-items-center rounded-full text-white/80 transition hover:bg-white/15 hover:text-white active:scale-95 cursor-pointer"
             >
-              <SkipForward className="w-4 h-4" />
+              <SkipForward className="w-4 h-4 fill-current" />
             </button>
-
-            {/* Open on YouTube Button */}
-            <a
-              href={`https://www.youtube.com/watch?v=${song.youtubeId}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="grid h-8 w-8 sm:h-9 sm:w-9 place-items-center rounded-full text-white/80 transition hover:bg-white/15 hover:text-white active:scale-95 cursor-pointer"
-              title="Open full video on YouTube"
-            >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
-              </svg>
-            </a>
-
-            {/* Volume Control / Toggle */}
-            <div className="relative hidden sm:block">
-              <button 
-                type="button"
-                onClick={handleToggleMute}
-                onMouseEnter={() => setShowVolumeSlider(true)}
-                aria-label="Volume toggle" 
-                className="grid h-8 w-8 place-items-center rounded-full text-white/80 transition hover:bg-white/15 hover:text-white active:scale-95 cursor-pointer"
-              >
-                {isMuted ? <VolumeX className="w-4 h-4 text-orange-400" /> : <Volume2 className="w-4 h-4" />}
-              </button>
-
-              {/* Hover Volume Slider popover */}
-              {showVolumeSlider && (
-                <div 
-                  className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 p-2 bg-[#0e1219]/95 border border-white/20 rounded-xl shadow-xl backdrop-blur-xl flex flex-col items-center gap-1 z-50 animate-in fade-in zoom-in-95 duration-150"
-                  onMouseLeave={() => setShowVolumeSlider(false)}
-                >
-                  <input
-                    type="range"
-                    min="0"
-                    max="100"
-                    value={isMuted ? 0 : volume}
-                    onChange={handleVolumeChange}
-                    className="w-20 h-1 accent-orange-400 cursor-pointer"
-                  />
-                  <span className="text-[10px] font-mono text-white/70">{isMuted ? 0 : volume}%</span>
-                </div>
-              )}
-            </div>
 
             {/* Playlist Drawer Button */}
             <button 
               type="button" 
               onClick={() => { soundFx.playClick(); setIsDrawerOpen(true); }}
               aria-label="Open playlist drawer" 
-              className="grid h-8 w-8 sm:h-9 sm:w-9 place-items-center rounded-full text-white/80 transition hover:bg-white/15 hover:text-white active:scale-95 cursor-pointer"
+              className="grid h-8 w-8 place-items-center rounded-full text-white/80 transition hover:bg-white/15 hover:text-white active:scale-95 cursor-pointer ml-0.5"
               title="View Desh Bhakti Playlist"
             >
               <ListMusic className="w-4 h-4" />

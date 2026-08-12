@@ -12,155 +12,40 @@
   --color-indiagreen-dark: #0B5E05;
 
   --font-sans: "Plus Jakarta Sans", sans-serif;
+  --font-hindi: "Rozha One", "Yatra One", "Tiro Devanagari Hindi", serif;
   --font-display: "Cinzel", serif;
-  --font-serif-luxury: "Playfair Display", serif;
-  --font-handwriting: "Caveat", cursive;
-  --font-script: "Marck Script", cursive;
 }
 
-html {
-  scroll-behavior: smooth;
-  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+html, body, #root {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
   background-color: #08090C;
   color: #F8FAFC;
-  overflow-x: hidden;
+  font-family: 'Plus Jakarta Sans', sans-serif;
 }
 
-body {
-  min-height: 100vh;
-  background: #08090C;
-  color: #F8FAFC;
-  overflow-x: hidden;
-  position: relative;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+.font-hindi {
+  font-family: 'Rozha One', 'Yatra One', 'Tiro Devanagari Hindi', serif;
 }
 
-/* Glassmorphism Classes */
-.glass-pill {
-  background: rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4), inset 0 1px 0 0 rgba(255, 255, 255, 0.2);
-}
-
-.glass-card {
-  background: rgba(14, 18, 25, 0.75);
+/* Glassmorphism */
+.glass-capsule {
+  background: rgba(15, 18, 25, 0.45);
   backdrop-filter: blur(24px) saturate(160%);
   -webkit-backdrop-filter: blur(24px) saturate(160%);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
-.glass-card-hover {
-  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.glass-card-hover:hover {
-  border-color: rgba(255, 153, 51, 0.4);
-  transform: translateY(-4px);
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.7), 0 0 30px rgba(255, 153, 51, 0.15), inset 0 1px 2px rgba(255, 255, 255, 0.25);
-}
-
-/* Video Overlay Cinematic Vignette */
-.cinematic-overlay {
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(circle at center, rgba(8, 9, 12, 0.25) 0%, rgba(8, 9, 12, 0.75) 75%, rgba(8, 9, 12, 0.96) 100%),
-              linear-gradient(to bottom, rgba(8, 9, 12, 0.5) 0%, rgba(8, 9, 12, 0.15) 30%, rgba(8, 9, 12, 0.4) 70%, rgba(8, 9, 12, 0.98) 100%);
-  pointer-events: none;
-}
-
-.cinematic-warm-grade {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(135deg, rgba(255, 153, 51, 0.08) 0%, transparent 50%, rgba(19, 136, 8, 0.06) 100%);
-  mix-blend-mode: overlay;
-  pointer-events: none;
-}
-
-/* Floating Postcard Gentle Breeze Animation */
-@keyframes float-postcard-1 {
-  0%, 100% { transform: translateY(0px) rotate(-4deg); }
-  50% { transform: translateY(-8px) rotate(-3deg); }
-}
-
-@keyframes float-postcard-2 {
-  0%, 100% { transform: translateY(0px) rotate(3deg); }
-  50% { transform: translateY(-10px) rotate(4.5deg); }
-}
-
-@keyframes float-postcard-3 {
-  0%, 100% { transform: translateY(0px) rotate(-2deg); }
-  50% { transform: translateY(-7px) rotate(-1deg); }
-}
-
-@keyframes float-postcard-4 {
-  0%, 100% { transform: translateY(0px) rotate(4deg); }
-  50% { transform: translateY(-9px) rotate(2.5deg); }
-}
-
-.animate-float-1 { animation: float-postcard-1 6s ease-in-out infinite; }
-.animate-float-2 { animation: float-postcard-2 7s ease-in-out infinite; }
-.animate-float-3 { animation: float-postcard-3 6.5s ease-in-out infinite; }
-.animate-float-4 { animation: float-postcard-4 7.5s ease-in-out infinite; }
-
-/* Equalizer Bars Animation */
-@keyframes eq-bounce-1 {
-  0%, 100% { height: 4px; }
-  50% { height: 16px; }
-}
-
-@keyframes eq-bounce-2 {
-  0%, 100% { height: 15px; }
-  50% { height: 5px; }
-}
-
-@keyframes eq-bounce-3 {
-  0%, 100% { height: 7px; }
-  50% { height: 18px; }
-}
-
-@keyframes eq-bounce-4 {
-  0%, 100% { height: 18px; }
-  50% { height: 8px; }
-}
-
-.eq-bar-1 { animation: eq-bounce-1 0.8s ease-in-out infinite; }
-.eq-bar-2 { animation: eq-bounce-2 0.7s ease-in-out infinite; }
-.eq-bar-3 { animation: eq-bounce-3 0.9s ease-in-out infinite; }
-.eq-bar-4 { animation: eq-bounce-4 0.65s ease-in-out infinite; }
-
-/* Custom Scrollbar */
-::-webkit-scrollbar {
-  width: 6px;
-}
-
-::-webkit-scrollbar-track {
-  background: #08090C;
-}
-
-::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.18);
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #FF9933;
-}
-
-/* Postcard tape effect */
-.washi-tape {
-  position: absolute;
-  top: -10px;
-  left: 50%;
-  transform: translateX(-50%) rotate(-2deg);
-  width: 70px;
-  height: 20px;
-  background: rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(4px);
-  border: 1px dashed rgba(255, 255, 255, 0.3);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  z-index: 10;
+/* Slow vinyl spin */
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }

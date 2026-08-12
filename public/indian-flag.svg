@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 600" width="100%" height="100%">
+  <!-- Saffron Band -->
+  <rect width="900" height="200" fill="#FF9933"/>
+  <!-- White Band -->
+  <rect y="200" width="900" height="200" fill="#FFFFFF"/>
+  <!-- Green Band -->
+  <rect y="400" width="900" height="200" fill="#128807"/>
+  <!-- Ashoka Chakra Navy Blue Circle & 24 Spokes -->
+  <g transform="translate(450, 300)">
+    <circle r="80" fill="none" stroke="#000088" stroke-width="6.5"/>
+    <circle r="16" fill="#000088"/>
+    <!-- 24 Spokes -->
+    <g stroke="#000088" stroke-width="3.5">
+      <line x1="0" y1="0" x2="0" y2="-80"/>
+      <line x1="0" y1="0" x2="0" y2="80"/>
+      <line x1="0" y1="0" x2="-80" y2="0"/>
+      <line x1="0" y1="0" x2="80" y2="0"/>
+      <line x1="0" y1="0" x2="56.56" y2="56.56"/>
+      <line x1="0" y1="0" x2="-56.56" y2="-56.56"/>
+      <line x1="0" y1="0" x2="56.56" y2="-56.56"/>
+      <line x1="0" y1="0" x2="-56.56" y2="56.56"/>
+      <line x1="0" y1="0" x2="73.91" y2="30.61"/>
+      <line x1="0" y1="0" x2="-73.91" y2="-30.61"/>
+      <line x1="0" y1="0" x2="30.61" y2="73.91"/>
+      <line x1="0" y1="0" x2="-30.61" y2="-73.91"/>
+      <line x1="0" y1="0" x2="73.91" y2="-30.61"/>
+      <line x1="0" y1="0" x2="-73.91" y2="30.61"/>
+      <line x1="0" y1="0" x2="30.61" y2="-73.91"/>
+      <line x1="0" y1="0" x2="-30.61" y2="73.91"/>
+      <line x1="0" y1="0" x2="78.78" y2="13.91"/>
+      <line x1="0" y1="0" x2="-78.78" y2="-13.91"/>
+      <line x1="0" y1="0" x2="13.91" y2="78.78"/>
+      <line x1="0" y1="0" x2="-13.91" y2="-78.78"/>
+      <line x1="0" y1="0" x2="78.78" y2="-13.91"/>
+      <line x1="0" y1="0" x2="-78.78" y2="13.91"/>
+      <line x1="0" y1="0" x2="13.91" y2="-78.78"/>
+      <line x1="0" y1="0" x2="-13.91" y2="78.78"/>
+    </g>
+  </g>
+</svg>
