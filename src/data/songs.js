@@ -1,0 +1,87 @@
+// 6 Authentic Original Patriotic Studio Recordings (Real Vocals & Orchestra)
+export const DESH_BHAKTI_SONGS = [
+  {
+    id: 1,
+    title: "Ae Mere Watan Ke Logon",
+    artist: "Lata Mangeshkar • C. Ramchandra",
+    era: "60s Classic",
+    year: "1963",
+    duration: "6:32",
+    durationSec: 392,
+    audioSrc: "/audio/song_1.m4a",
+    youtubeId: "qX82R0H2w8U",
+    tag: "60s Eternal Legend",
+    accentColor: "#FF9933",
+    cover: "https://images.unsplash.com/photo-1532375810709-75b1da00537c?auto=format&fit=crop&w=400&q=80"
+  },
+  {
+    id: 2,
+    title: "Maa Tujhe Salaam (Vande Mataram)",
+    artist: "A.R. Rahman • Mehboob",
+    era: "90s Golden Anthem",
+    year: "1997",
+    duration: "6:18",
+    durationSec: 378,
+    audioSrc: "/audio/song_2.m4a",
+    youtubeId: "jDn2274wKWg",
+    tag: "90s Golden Jubilee",
+    accentColor: "#10B981",
+    cover: "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=400&q=80"
+  },
+  {
+    id: 3,
+    title: "Sandese Aate Hai (Border)",
+    artist: "Sonu Nigam & Roop Kumar Rathod",
+    era: "90s Blockbuster",
+    year: "1997",
+    duration: "7:25",
+    durationSec: 445,
+    audioSrc: "/audio/song_3.m4a",
+    youtubeId: "rF8F3N0y09M",
+    tag: "90s Ballad",
+    accentColor: "#059669",
+    cover: "https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=400&q=80"
+  },
+  {
+    id: 4,
+    title: "Bharat Humko Jaan Se Pyara Hai",
+    artist: "Hariharan • A.R. Rahman (Roja)",
+    era: "90s Melody",
+    year: "1992",
+    duration: "5:40",
+    durationSec: 340,
+    audioSrc: "/audio/song_4.m4a",
+    youtubeId: "2iR3s2lX76w",
+    tag: "90s Roja Anthem",
+    accentColor: "#3B82F6",
+    cover: "https://images.unsplash.com/photo-1524492412937-b28074a5d7da?auto=format&fit=crop&w=400&q=80"
+  },
+  {
+    id: 5,
+    title: "Chak De India",
+    artist: "Sukhwinder Singh • Salim-Sulaiman",
+    era: "2000s Energy",
+    year: "2007",
+    duration: "4:43",
+    durationSec: 283,
+    audioSrc: "/audio/song_5.m4a",
+    youtubeId: "OQ1T3y0c3b8",
+    tag: "2000s Victory Roar",
+    accentColor: "#F59E0B",
+    cover: "https://images.unsplash.com/photo-1566552881560-0be86c53e56f?auto=format&fit=crop&w=400&q=80"
+  },
+  {
+    id: 6,
+    title: "Teri Mitti (Kesari)",
+    artist: "B Praak • Manoj Muntashir",
+    era: "2010s/20s Emotion",
+    year: "2019",
+    duration: "5:14",
+    durationSec: 314,
+    audioSrc: "/audio/song_6.m4a",
+    youtubeId: "wF_B_UxsPio",
+    tag: "Modern Masterpiece",
+    accentColor: "#FF8F00",
+    cover: "https://images.unsplash.com/photo-1597047084897-51e81819a499?auto=format&fit=crop&w=400&q=80"
+  }
+];

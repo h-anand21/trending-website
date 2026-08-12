@@ -1,19 +1,45 @@
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import { Sparkles, Flag, Heart, ArrowDown, Radio } from 'lucide-react';
 import QuoteRotator from './QuoteRotator';
 import { HandwrittenPostcard, CentralMemoryCard } from './MemoryPostcard';
 import { soundFx } from '../utils/soundEffects';
 
-export default function Hero({ onTriggerSalute }) {
+export default function Hero({ onTriggerSalute, currentTime = 0, isPlaying = false }) {
+  const videoRef = useRef(null);
+
+  // Exact Mathematical Synchronization Rule:
+  // videoTime = musicCurrentTime % 10
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const videoDuration = 10;
+    const targetVideoTime = currentTime % videoDuration;
+
+    // Synchronize video timeline strictly with music timeline
+    if (Math.abs(video.currentTime - targetVideoTime) > 0.4) {
+      video.currentTime = targetVideoTime;
+    }
+
+    if (isPlaying) {
+      if (video.paused) {
+        video.play().catch(() => {});
+      }
+    } else {
+      if (!video.paused) {
+        video.pause();
+      }
+    }
+  }, [currentTime, isPlaying]);
+
   return (
     <section id="hero" className="relative min-h-screen w-full flex flex-col items-center justify-between pt-24 sm:pt-28 pb-32 sm:pb-36 px-4 sm:px-6 overflow-hidden">
       
-      {/* 1. Cinematic Background Video Layer (HTML5 Video, Always Muted Permanently) */}
+      {/* 1. Cinematic Background Video Layer (HTML5 Video, Always Muted, Master-synced to Song Timeline) */}
       <div className="fixed inset-0 -z-20 w-full h-full bg-black overflow-hidden pointer-events-none">
         <video
+          ref={videoRef}
           src="/video.mp4"
-          autoPlay
-          loop
           muted
           playsInline
           className="w-full h-full object-cover scale-105 filter brightness-90 contrast-105"
@@ -99,24 +125,25 @@ export default function Hero({ onTriggerSalute }) {
         
         {/* Keyboard Salute Pill CTA */}
         <button
-          onClick={() => onTriggerSalute()}
-          className="group inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-2xl border border-white/20 hover:border-orange-400/50 text-xs sm:text-sm font-medium text-white shadow-xl transition-all active:scale-95 cursor-pointer"
+          onClick={() => { soundFx.playClick(); onTriggerSalute(); }}
+          className="group flex items-center gap-2.5 px-5 py-2.5 rounded-full glass-card hover:border-orange-400/50 transition-all hover:scale-105 shadow-xl cursor-pointer"
         >
-          <span className="text-base animate-bounce">🫡</span>
-          <span>Press</span>
-          <kbd className="px-2 py-0.5 rounded bg-orange-500/30 border border-orange-400/40 text-[11px] font-mono text-orange-200 font-bold uppercase">
+          <span className="flex h-5 w-5 items-center justify-center rounded-md bg-white/20 text-xs font-mono font-bold text-white group-hover:bg-orange-500 transition-colors">
             S
-          </kbd>
-          <span>to Salute 🇮🇳</span>
+          </span>
+          <span className="text-xs sm:text-sm font-medium tracking-wide text-white/90">
+            Press <strong className="text-orange-300">S</strong> to Salute
+          </span>
+          <span className="text-sm">🇮🇳</span>
         </button>
 
         {/* Scroll Indicator */}
         <a 
           href="#memories" 
           onClick={() => soundFx.playClick()}
-          className="flex items-center gap-1 text-[11px] font-mono tracking-widest text-white/50 hover:text-white transition-colors uppercase pt-1"
+          className="flex items-center gap-1.5 text-[11px] font-mono tracking-widest text-white/50 hover:text-white transition-colors uppercase pt-2"
         >
-          <span>Scroll to relive memories</span>
+          <span>Scroll to Explore Memories</span>
           <ArrowDown className="w-3 h-3 animate-bounce" />
         </a>
       </div>

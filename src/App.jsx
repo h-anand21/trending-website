@@ -7,18 +7,38 @@ import Footer from './components/Footer';
 import MusicPlayer from './components/MusicPlayer';
 import SaluteModal from './components/SaluteModal';
 import ParticleLayer from './components/ParticleLayer';
-import { PATRIOTIC_PLAYLIST } from './data/playlist';
+import { DESH_BHAKTI_SONGS } from './data/songs';
+import { soundFx } from './utils/soundEffects';
+import { patrioticSynth } from './utils/patrioticAudioEngine';
 
 export default function App() {
   const [isPlaying, setIsPlaying] = useState(false);
-  const [currentTrack, setCurrentTrack] = useState(PATRIOTIC_PLAYLIST[0]);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [currentTrack, setCurrentTrack] = useState(DESH_BHAKTI_SONGS[0]);
   const [isSaluteOpen, setIsSaluteOpen] = useState(false);
   const [isPlaylistDrawerOpen, setIsPlaylistDrawerOpen] = useState(false);
+
+  // Global AudioContext unlocker on first user gesture
+  useEffect(() => {
+    const unlockAudio = () => {
+      soundFx.init();
+      patrioticSynth.init();
+    };
+
+    window.addEventListener('click', unlockAudio, { once: true });
+    window.addEventListener('touchstart', unlockAudio, { once: true });
+    window.addEventListener('keydown', unlockAudio, { once: true });
+
+    return () => {
+      window.removeEventListener('click', unlockAudio);
+      window.removeEventListener('touchstart', unlockAudio);
+      window.removeEventListener('keydown', unlockAudio);
+    };
+  }, []);
 
   // Global Keyboard 'S' for Salute
   useEffect(() => {
     const handleKeyDown = (e) => {
-      // If user is typing in an input, don't hijack
       if (['INPUT', 'TEXTAREA'].includes(e.target.tagName)) return;
       
       if (e.key === 's' || e.key === 'S') {
@@ -47,10 +67,12 @@ export default function App() {
         onOpenPlaylist={() => setIsPlaylistDrawerOpen(true)}
       />
 
-      {/* 3. Full-Screen Cinematic Hero Experience with Video Background (Always Muted) */}
+      {/* 3. Full-Screen Cinematic Hero Experience with Video Background (Master synced to musicCurrentTime % 10) */}
       <main>
         <Hero
           onTriggerSalute={triggerSalute}
+          currentTime={currentTime}
+          isPlaying={isPlaying}
         />
 
         {/* 4. "Memories That Stay" Interactive Cards Section */}
@@ -70,6 +92,8 @@ export default function App() {
       <MusicPlayer
         isPlaying={isPlaying}
         setIsPlaying={setIsPlaying}
+        currentTime={currentTime}
+        setCurrentTime={setCurrentTime}
         currentTrack={currentTrack}
         setCurrentTrack={setCurrentTrack}
       />

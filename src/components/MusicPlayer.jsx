@@ -3,14 +3,21 @@ import {
   Play, Pause, SkipBack, SkipForward, Volume2, VolumeX, 
   ListMusic, Shuffle, Repeat, ExternalLink, Sparkles 
 } from 'lucide-react';
-import { PATRIOTIC_PLAYLIST } from '../data/playlist';
+import { DESH_BHAKTI_SONGS } from '../data/songs';
 import { soundFx } from '../utils/soundEffects';
 import PlaylistDrawer from './PlaylistDrawer';
 
-export default function MusicPlayer({ isPlaying, setIsPlaying, currentTrack, setCurrentTrack }) {
-  const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(currentTrack.durationSec || 300);
-  const [volume, setVolume] = useState(85);
+export default function MusicPlayer({ 
+  isPlaying, 
+  setIsPlaying, 
+  currentTime = 0, 
+  setCurrentTime,
+  currentTrack, 
+  setCurrentTrack 
+}) {
+  const [trackIndex, setTrackIndex] = useState(0);
+  const [duration, setDuration] = useState(392);
+  const [volume, setVolume] = useState(90);
   const [isMuted, setIsMuted] = useState(false);
   const [isShuffle, setIsShuffle] = useState(false);
   const [isRepeat, setIsRepeat] = useState(false);
@@ -19,27 +26,33 @@ export default function MusicPlayer({ isPlaying, setIsPlaying, currentTrack, set
 
   const audioRef = useRef(null);
 
-  // Initialize HTML5 Audio playback
+  const song = DESH_BHAKTI_SONGS[trackIndex] || DESH_BHAKTI_SONGS[0];
+
+  // Initialize and load real studio audio file
   useEffect(() => {
     if (!audioRef.current) {
-      audioRef.current = new Audio();
-    }
-    
-    const audio = audioRef.current;
-    audio.volume = isMuted ? 0 : volume / 100;
-    
-    // Set source to direct audio stream if available
-    if (currentTrack.audioUrl) {
-      audio.src = currentTrack.audioUrl;
-      audio.load();
-      if (isPlaying) {
-        audio.play().catch(e => console.warn("Audio play prevented:", e));
-      }
+      audioRef.current = new Audio(song.audioSrc);
     }
 
+    const audio = audioRef.current;
+    audio.src = song.audioSrc;
+    audio.preload = 'auto';
+    audio.volume = isMuted ? 0 : volume / 100;
+    audio.muted = isMuted;
+
     const handleTimeUpdate = () => {
-      if (audio.currentTime) setCurrentTime(audio.currentTime);
-      if (audio.duration && !isNaN(audio.duration)) setDuration(audio.duration);
+      if (audio.currentTime !== undefined && !isNaN(audio.currentTime)) {
+        setCurrentTime(Math.floor(audio.currentTime));
+      }
+      if (audio.duration && !isNaN(audio.duration) && audio.duration > 0) {
+        setDuration(Math.floor(audio.duration));
+      }
+    };
+
+    const handleLoadedMetadata = () => {
+      if (audio.duration && !isNaN(audio.duration) && audio.duration > 0) {
+        setDuration(Math.floor(audio.duration));
+      }
     };
 
     const handleEnded = () => {
@@ -51,81 +64,104 @@ export default function MusicPlayer({ isPlaying, setIsPlaying, currentTrack, set
       }
     };
 
-    const handleLoadedMetadata = () => {
-      if (audio.duration && !isNaN(audio.duration)) {
-        setDuration(audio.duration);
-      }
-    };
-
     audio.addEventListener('timeupdate', handleTimeUpdate);
-    audio.addEventListener('ended', handleEnded);
     audio.addEventListener('loadedmetadata', handleLoadedMetadata);
+    audio.addEventListener('ended', handleEnded);
+
+    if (isPlaying) {
+      audio.play().catch(e => console.warn("Audio play prevented:", e));
+    }
 
     return () => {
       audio.removeEventListener('timeupdate', handleTimeUpdate);
-      audio.removeEventListener('ended', handleEnded);
       audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
+      audio.removeEventListener('ended', handleEnded);
     };
-  }, [currentTrack]);
+  }, [trackIndex]);
 
-  // Handle Play/Pause state changes
+  // Handle Play/Pause state
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
 
     if (isPlaying) {
-      audio.play().catch((err) => {
-        console.warn("Autoplay blocked, user interaction required:", err);
-      });
+      audio.muted = isMuted;
+      audio.volume = isMuted ? 0 : volume / 100;
+      audio.play().catch(e => console.warn("Audio play error:", e));
     } else {
       audio.pause();
     }
   }, [isPlaying]);
 
-  // Handle Volume / Mute changes
+  // Volume & Mute sync
   useEffect(() => {
     if (audioRef.current) {
       audioRef.current.volume = isMuted ? 0 : volume / 100;
+      audioRef.current.muted = isMuted;
     }
   }, [volume, isMuted]);
 
   // Play / Pause toggle
   const handleTogglePlay = () => {
     soundFx.playClick();
-    setIsPlaying(!isPlaying);
+    if (!isPlaying) {
+      if (audioRef.current) {
+        audioRef.current.muted = false;
+        audioRef.current.volume = volume / 100;
+        audioRef.current.play().catch(e => console.warn("Audio error:", e));
+      }
+      setIsPlaying(true);
+    } else {
+      if (audioRef.current) {
+        audioRef.current.pause();
+      }
+      setIsPlaying(false);
+    }
   };
 
   // Next Track
   const handleNextTrack = () => {
     soundFx.playClick();
-    const currentIndex = PATRIOTIC_PLAYLIST.findIndex(t => t.id === currentTrack.id);
-    let nextIndex;
+    let nextIdx;
     if (isShuffle) {
-      nextIndex = Math.floor(Math.random() * PATRIOTIC_PLAYLIST.length);
+      nextIdx = Math.floor(Math.random() * DESH_BHAKTI_SONGS.length);
     } else {
-      nextIndex = (currentIndex + 1) % PATRIOTIC_PLAYLIST.length;
+      nextIdx = (trackIndex + 1) % DESH_BHAKTI_SONGS.length;
     }
-    setCurrentTrack(PATRIOTIC_PLAYLIST[nextIndex]);
+    setTrackIndex(nextIdx);
+    setCurrentTrack(DESH_BHAKTI_SONGS[nextIdx]);
+    setCurrentTime(0);
     setIsPlaying(true);
   };
 
   // Previous Track
   const handlePrevTrack = () => {
     soundFx.playClick();
-    const currentIndex = PATRIOTIC_PLAYLIST.findIndex(t => t.id === currentTrack.id);
-    const prevIndex = (currentIndex - 1 + PATRIOTIC_PLAYLIST.length) % PATRIOTIC_PLAYLIST.length;
-    setCurrentTrack(PATRIOTIC_PLAYLIST[prevIndex]);
+    const prevIdx = (trackIndex - 1 + DESH_BHAKTI_SONGS.length) % DESH_BHAKTI_SONGS.length;
+    setTrackIndex(prevIdx);
+    setCurrentTrack(DESH_BHAKTI_SONGS[prevIdx]);
+    setCurrentTime(0);
     setIsPlaying(true);
   };
 
-  // Seek bar handler
+  // Select track from drawer
+  const handleSelectTrack = (selectedSong) => {
+    const idx = DESH_BHAKTI_SONGS.findIndex(s => s.id === selectedSong.id);
+    if (idx !== -1) {
+      setTrackIndex(idx);
+      setCurrentTrack(DESH_BHAKTI_SONGS[idx]);
+      setCurrentTime(0);
+      setIsPlaying(true);
+    }
+  };
+
+  // Seek bar
   const handleSeek = (e) => {
     const rect = e.currentTarget.getBoundingClientRect();
     const clickX = e.clientX - rect.left;
     const width = rect.width;
     const seekPercentage = Math.max(0, Math.min(1, clickX / width));
-    const seekTime = seekPercentage * duration;
-    
+    const seekTime = Math.floor(seekPercentage * duration);
     setCurrentTime(seekTime);
     if (audioRef.current) {
       audioRef.current.currentTime = seekTime;
@@ -145,7 +181,7 @@ export default function MusicPlayer({ isPlaying, setIsPlaying, currentTrack, set
   };
 
   const formatTime = (seconds) => {
-    if (isNaN(seconds) || seconds === null) return "0:00";
+    if (!isFinite(seconds) || seconds === null) return "0:00";
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
     return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
@@ -170,11 +206,11 @@ export default function MusicPlayer({ isPlaying, setIsPlaying, currentTrack, set
                 animationPlayState: isPlaying ? 'running' : 'paused'
               }}
               onClick={() => setIsDrawerOpen(true)}
-              title="Click to view playlist"
+              title="Click to view full playlist"
             >
               <img 
-                src={currentTrack.cover} 
-                alt={currentTrack.title} 
+                src={song.cover} 
+                alt={song.title} 
                 className="h-full w-full object-cover"
               />
             </div>
@@ -186,7 +222,7 @@ export default function MusicPlayer({ isPlaying, setIsPlaying, currentTrack, set
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2">
               <p className="truncate text-sm sm:text-[15px] font-semibold text-white drop-shadow-sm">
-                {currentTrack.title}
+                {song.title}
               </p>
               {isPlaying && (
                 <span className="hidden sm:inline-flex items-center gap-0.5 h-3">
@@ -198,7 +234,7 @@ export default function MusicPlayer({ isPlaying, setIsPlaying, currentTrack, set
             </div>
             
             <p className="truncate text-xs sm:text-[13px] text-white/70">
-              {currentTrack.artist}
+              {song.artist}
             </p>
 
             {/* Seek Bar */}
@@ -227,7 +263,7 @@ export default function MusicPlayer({ isPlaying, setIsPlaying, currentTrack, set
               <div className="flex items-center justify-between mt-0.5 text-[10px] sm:text-[11px] tabular-nums text-white/60">
                 <span>{formatTime(currentTime)} / {formatTime(duration)}</span>
                 <span className="hidden sm:inline text-orange-300/80 font-mono tracking-wider">
-                  {currentTrack.tag}
+                  {song.tag}
                 </span>
               </div>
             </div>
@@ -268,6 +304,19 @@ export default function MusicPlayer({ isPlaying, setIsPlaying, currentTrack, set
             >
               <SkipForward className="w-4 h-4" />
             </button>
+
+            {/* Open on YouTube Button */}
+            <a
+              href={`https://www.youtube.com/watch?v=${song.youtubeId}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="grid h-8 w-8 sm:h-9 sm:w-9 place-items-center rounded-full text-white/80 transition hover:bg-white/15 hover:text-white active:scale-95 cursor-pointer"
+              title="Open full video on YouTube"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+              </svg>
+            </a>
 
             {/* Volume Control / Toggle */}
             <div className="relative hidden sm:block">
@@ -318,12 +367,9 @@ export default function MusicPlayer({ isPlaying, setIsPlaying, currentTrack, set
       <PlaylistDrawer
         isOpen={isDrawerOpen}
         onClose={() => setIsDrawerOpen(false)}
-        currentTrack={currentTrack}
+        currentTrack={song}
         isPlaying={isPlaying}
-        onSelectTrack={(track) => {
-          setCurrentTrack(track);
-          setIsPlaying(true);
-        }}
+        onSelectTrack={handleSelectTrack}
       />
     </>
   );
