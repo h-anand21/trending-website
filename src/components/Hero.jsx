@@ -23,31 +23,31 @@ export default function Hero({ isVideoMuted, onTriggerSalute }) {
         <div className="cinematic-warm-grade"></div>
       </div>
 
-      {/* Floating Handwritten Nostalgic Postcards on Left & Right (Desktop / Tablet) */}
+      {/* Floating Handwritten Nostalgic Postcards on Left & Right with Gentle Breeze Physics */}
       <div className="hidden lg:block">
         <HandwrittenPostcard
           text="School assembly yaad hai?"
           subtext="7:30 AM • White Uniforms"
-          rotation="-4deg"
+          animationClass="animate-float-1"
           positionClass="top-[18%] left-[4%]"
         />
         <HandwrittenPostcard
           text="Subah ki parade aur drum roll..."
           subtext="Marching 1-2-1"
-          rotation="3deg"
-          positionClass="top-[32%] right-[4%]"
+          animationClass="animate-float-2"
+          positionClass="top-[30%] right-[4%]"
         />
         <HandwrittenPostcard
           text="Haath mein chhota sa Tiranga..."
           subtext="₹2 Joy • Infinite Pride"
-          rotation="-2deg"
-          positionClass="bottom-[22%] left-[5%]"
+          animationClass="animate-float-3"
+          positionClass="bottom-[22%] left-[4%]"
         />
         <HandwrittenPostcard
           text="Ladoo lene ki lambi line!"
           subtext="The Sweet Taste of Freedom"
-          rotation="4deg"
-          positionClass="bottom-[24%] right-[5%]"
+          animationClass="animate-float-4"
+          positionClass="bottom-[24%] right-[4%]"
         />
       </div>
 
@@ -100,7 +100,7 @@ export default function Hero({ isVideoMuted, onTriggerSalute }) {
         {/* Keyboard Salute Pill CTA */}
         <button
           onClick={() => onTriggerSalute()}
-          className="group inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-2xl border border-white/20 hover:border-orange-400/50 text-xs sm:text-sm font-medium text-white shadow-xl transition-all active:scale-95"
+          className="group inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-2xl border border-white/20 hover:border-orange-400/50 text-xs sm:text-sm font-medium text-white shadow-xl transition-all active:scale-95 cursor-pointer"
         >
           <span className="text-base animate-bounce">🫡</span>
           <span>Press</span>
