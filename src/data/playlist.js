@@ -9,7 +9,7 @@ export const PATRIOTIC_PLAYLIST = [
     year: "1963",
     duration: "6:32",
     durationSec: 392,
-    youtubeId: "vBf4eQxI_6E", // Iconic live rendition
+    youtubeId: "vBf4eQxI_6E",
     tag: "Eternal Tribute",
     accentColor: "#FF9933",
     description: "The timeless tribute that moved the entire nation to tears at the National Stadium in 1963.",
@@ -26,7 +26,7 @@ export const PATRIOTIC_PLAYLIST = [
     tag: "Golden Jubilee Anthem",
     accentColor: "#10B981",
     description: "A.R. Rahman's electrifying anthem celebrating 50 years of Indian Independence.",
-    cover: "https://images.unsplash.com/photo-1566552881560-0be86c53e56f?auto=format&fit=crop&w=400&q=80"
+    cover: "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=400&q=80"
   },
   {
     id: "track-3",
@@ -78,6 +78,6 @@ export const PATRIOTIC_PLAYLIST = [
     tag: "Energy & Victory",
     accentColor: "#F59E0B",
     description: "The roaring roar of triumph that reverberates through every stadium and celebration.",
-    cover: "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=400&q=80"
+    cover: "https://images.unsplash.com/photo-1566552881560-0be86c53e56f?auto=format&fit=crop&w=400&q=80"
   }
 ];
