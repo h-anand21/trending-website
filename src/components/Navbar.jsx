@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Volume2, VolumeX, Sparkles, Music, Flag, ExternalLink, Menu, X } from 'lucide-react';
+import { Sparkles, Music, Flag, ExternalLink, Menu, X } from 'lucide-react';
 import { soundFx } from '../utils/soundEffects';
 
-export default function Navbar({ isVideoMuted, onToggleVideoMute, onTriggerSalute, onOpenPlaylist }) {
+export default function Navbar({ onTriggerSalute, onOpenPlaylist }) {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [currentTime, setCurrentTime] = useState('');
@@ -74,20 +74,20 @@ export default function Navbar({ isVideoMuted, onToggleVideoMute, onTriggerSalut
           <a href="#timeline" className="hover:text-orange-400 transition-colors">Timeline</a>
           <button 
             onClick={() => { soundFx.playClick(); onOpenPlaylist(); }}
-            className="hover:text-emerald-400 transition-colors flex items-center gap-1.5"
+            className="hover:text-emerald-400 transition-colors flex items-center gap-1.5 cursor-pointer"
           >
             <Music className="w-3.5 h-3.5" />
             <span>Songs</span>
           </button>
         </nav>
 
-        {/* Right Side: Action Pills (Salute, Video Sound, Spotify/YT, Menu) */}
+        {/* Right Side: Action Pills (Salute, Spotify/YT, Menu) */}
         <div className="flex items-center gap-2 sm:gap-3">
           
           {/* Press S to Salute Pill */}
           <button
             onClick={() => onTriggerSalute()}
-            className="group/salute relative flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-semibold text-white bg-gradient-to-r from-orange-500/20 via-white/10 to-emerald-500/20 hover:from-orange-500/30 hover:to-emerald-500/30 backdrop-blur-xl border border-orange-500/30 hover:border-orange-400/60 shadow-[0_0_15px_rgba(255,153,51,0.25)] transition-all transform active:scale-95"
+            className="group/salute relative flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-semibold text-white bg-gradient-to-r from-orange-500/20 via-white/10 to-emerald-500/20 hover:from-orange-500/30 hover:to-emerald-500/30 backdrop-blur-xl border border-orange-500/30 hover:border-orange-400/60 shadow-[0_0_15px_rgba(255,153,51,0.25)] transition-all transform active:scale-95 cursor-pointer"
             title="Press 'S' key anywhere to Salute"
           >
             <span className="text-sm sm:text-base animate-bounce">🫡</span>
@@ -95,20 +95,6 @@ export default function Navbar({ isVideoMuted, onToggleVideoMute, onTriggerSalut
             <span className="hidden sm:inline-block px-1.5 py-0.2 rounded bg-white/20 text-[10px] font-mono uppercase tracking-wider text-orange-200">
               S
             </span>
-          </button>
-
-          {/* Video Audio Mute/Unmute Toggle */}
-          <button
-            onClick={onToggleVideoMute}
-            className="p-2 sm:p-2.5 rounded-full text-white/80 hover:text-white bg-white/10 hover:bg-white/20 backdrop-blur-xl border border-white/15 transition-all active:scale-95 drop-shadow-md"
-            title={isVideoMuted ? "Unmute Background Atmosphere" : "Mute Background Atmosphere"}
-            aria-label="Toggle Video Sound"
-          >
-            {isVideoMuted ? (
-              <VolumeX className="w-4 h-4 text-white/60" />
-            ) : (
-              <Volume2 className="w-4 h-4 text-emerald-400 animate-pulse" />
-            )}
           </button>
 
           {/* Spotify & YT Music Links */}
@@ -128,7 +114,7 @@ export default function Navbar({ isVideoMuted, onToggleVideoMute, onTriggerSalut
           {/* Mobile Hamburger Toggle */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="p-2 sm:p-2.5 rounded-full text-white/80 hover:text-white bg-white/10 hover:bg-white/20 backdrop-blur-xl border border-white/15 md:hidden"
+            className="p-2 sm:p-2.5 rounded-full text-white/80 hover:text-white bg-white/10 hover:bg-white/20 backdrop-blur-xl border border-white/15 md:hidden cursor-pointer"
             aria-label="Toggle Navigation Menu"
           >
             {mobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}

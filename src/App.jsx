@@ -8,12 +8,10 @@ import MusicPlayer from './components/MusicPlayer';
 import SaluteModal from './components/SaluteModal';
 import ParticleLayer from './components/ParticleLayer';
 import { PATRIOTIC_PLAYLIST } from './data/playlist';
-import { soundFx } from './utils/soundEffects';
 
 export default function App() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTrack, setCurrentTrack] = useState(PATRIOTIC_PLAYLIST[0]);
-  const [isVideoMuted, setIsVideoMuted] = useState(true);
   const [isSaluteOpen, setIsSaluteOpen] = useState(false);
   const [isPlaylistDrawerOpen, setIsPlaylistDrawerOpen] = useState(false);
 
@@ -37,11 +35,6 @@ export default function App() {
     setIsSaluteOpen(true);
   };
 
-  const toggleVideoMute = () => {
-    soundFx.playClick();
-    setIsVideoMuted(prev => !prev);
-  };
-
   return (
     <div className="relative min-h-screen bg-[#08090C] text-white selection:bg-orange-500/30 selection:text-orange-200">
       
@@ -50,16 +43,13 @@ export default function App() {
 
       {/* 2. Top Floating Glass Navbar */}
       <Navbar
-        isVideoMuted={isVideoMuted}
-        onToggleVideoMute={toggleVideoMute}
         onTriggerSalute={triggerSalute}
         onOpenPlaylist={() => setIsPlaylistDrawerOpen(true)}
       />
 
-      {/* 3. Full-Screen Cinematic Hero Experience with Video Background */}
+      {/* 3. Full-Screen Cinematic Hero Experience with Video Background (Always Muted) */}
       <main>
         <Hero
-          isVideoMuted={isVideoMuted}
           onTriggerSalute={triggerSalute}
         />
 

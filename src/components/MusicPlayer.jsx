@@ -10,130 +10,89 @@ import PlaylistDrawer from './PlaylistDrawer';
 export default function MusicPlayer({ isPlaying, setIsPlaying, currentTrack, setCurrentTrack }) {
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(currentTrack.durationSec || 300);
-  const [volume, setVolume] = useState(80);
+  const [volume, setVolume] = useState(85);
   const [isMuted, setIsMuted] = useState(false);
   const [isShuffle, setIsShuffle] = useState(false);
   const [isRepeat, setIsRepeat] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [playerReady, setPlayerReady] = useState(false);
+  const [showVolumeSlider, setShowVolumeSlider] = useState(false);
 
-  const playerRef = useRef(null);
-  const timeUpdateInterval = useRef(null);
+  const audioRef = useRef(null);
 
-  // Initialize YouTube IFrame Player
+  // Initialize HTML5 Audio playback
   useEffect(() => {
-    // Check if YT is loaded on window
-    const initYT = () => {
-      if (window.YT && window.YT.Player) {
-        if (!playerRef.current) {
-          playerRef.current = new window.YT.Player('yt-audio-player', {
-            height: '1',
-            width: '1',
-            videoId: currentTrack.youtubeId,
-            playerVars: {
-              autoplay: 0,
-              controls: 0,
-              disablekb: 1,
-              enablejsapi: 1,
-              fs: 0,
-              modestbranding: 1,
-              playsinline: 1,
-              rel: 0,
-              origin: window.location.origin
-            },
-            events: {
-              onReady: (event) => {
-                setPlayerReady(true);
-                event.target.setVolume(volume);
-              },
-              onStateChange: (event) => {
-                // 1 = PLAYING, 2 = PAUSED, 0 = ENDED
-                if (event.data === window.YT.PlayerState.PLAYING) {
-                  setIsPlaying(true);
-                } else if (event.data === window.YT.PlayerState.PAUSED) {
-                  setIsPlaying(false);
-                } else if (event.data === window.YT.PlayerState.ENDED) {
-                  handleNextTrack();
-                }
-              }
-            }
-          });
-        }
-      } else {
-        // Load YouTube IFrame API script if not loaded
-        if (!document.getElementById('yt-script')) {
-          const tag = document.createElement('script');
-          tag.id = 'yt-script';
-          tag.src = 'https://www.youtube.com/iframe_api';
-          const firstScriptTag = document.getElementsByTagName('script')[0];
-          firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-        }
-        window.onYouTubeIframeAPIReady = () => {
-          initYT();
-        };
-      }
-    };
-
-    initYT();
-
-    return () => {
-      if (timeUpdateInterval.current) clearInterval(timeUpdateInterval.current);
-    };
-  }, []);
-
-  // Update track when currentTrack changes
-  useEffect(() => {
-    if (playerRef.current && playerRef.current.loadVideoById && playerReady) {
+    if (!audioRef.current) {
+      audioRef.current = new Audio();
+    }
+    
+    const audio = audioRef.current;
+    audio.volume = isMuted ? 0 : volume / 100;
+    
+    // Set source to direct audio stream if available
+    if (currentTrack.audioUrl) {
+      audio.src = currentTrack.audioUrl;
+      audio.load();
       if (isPlaying) {
-        playerRef.current.loadVideoById(currentTrack.youtubeId);
-      } else {
-        playerRef.current.cueVideoById(currentTrack.youtubeId);
+        audio.play().catch(e => console.warn("Audio play prevented:", e));
       }
     }
-    setCurrentTime(0);
-    setDuration(currentTrack.durationSec);
-  }, [currentTrack, playerReady]);
 
-  // Track progress timer
-  useEffect(() => {
-    if (isPlaying) {
-      timeUpdateInterval.current = setInterval(() => {
-        if (playerRef.current && playerRef.current.getCurrentTime) {
-          try {
-            const cur = playerRef.current.getCurrentTime();
-            const dur = playerRef.current.getDuration();
-            if (cur !== undefined && !isNaN(cur)) setCurrentTime(cur);
-            if (dur && !isNaN(dur) && dur > 0) setDuration(dur);
-          } catch (e) {
-            // Fallback simulated progress
-            setCurrentTime((prev) => (prev + 1) % duration);
-          }
-        } else {
-          setCurrentTime((prev) => (prev + 1) % duration);
-        }
-      }, 1000);
-    } else {
-      if (timeUpdateInterval.current) clearInterval(timeUpdateInterval.current);
-    }
-    return () => {
-      if (timeUpdateInterval.current) clearInterval(timeUpdateInterval.current);
+    const handleTimeUpdate = () => {
+      if (audio.currentTime) setCurrentTime(audio.currentTime);
+      if (audio.duration && !isNaN(audio.duration)) setDuration(audio.duration);
     };
-  }, [isPlaying, duration]);
 
-  // Play / Pause handler
+    const handleEnded = () => {
+      if (isRepeat) {
+        audio.currentTime = 0;
+        audio.play();
+      } else {
+        handleNextTrack();
+      }
+    };
+
+    const handleLoadedMetadata = () => {
+      if (audio.duration && !isNaN(audio.duration)) {
+        setDuration(audio.duration);
+      }
+    };
+
+    audio.addEventListener('timeupdate', handleTimeUpdate);
+    audio.addEventListener('ended', handleEnded);
+    audio.addEventListener('loadedmetadata', handleLoadedMetadata);
+
+    return () => {
+      audio.removeEventListener('timeupdate', handleTimeUpdate);
+      audio.removeEventListener('ended', handleEnded);
+      audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
+    };
+  }, [currentTrack]);
+
+  // Handle Play/Pause state changes
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    if (isPlaying) {
+      audio.play().catch((err) => {
+        console.warn("Autoplay blocked, user interaction required:", err);
+      });
+    } else {
+      audio.pause();
+    }
+  }, [isPlaying]);
+
+  // Handle Volume / Mute changes
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.volume = isMuted ? 0 : volume / 100;
+    }
+  }, [volume, isMuted]);
+
+  // Play / Pause toggle
   const handleTogglePlay = () => {
     soundFx.playClick();
-    if (!isPlaying) {
-      if (playerRef.current && playerRef.current.playVideo) {
-        playerRef.current.playVideo();
-      }
-      setIsPlaying(true);
-    } else {
-      if (playerRef.current && playerRef.current.pauseVideo) {
-        playerRef.current.pauseVideo();
-      }
-      setIsPlaying(false);
-    }
+    setIsPlaying(!isPlaying);
   };
 
   // Next Track
@@ -166,27 +125,27 @@ export default function MusicPlayer({ isPlaying, setIsPlaying, currentTrack, set
     const width = rect.width;
     const seekPercentage = Math.max(0, Math.min(1, clickX / width));
     const seekTime = seekPercentage * duration;
+    
     setCurrentTime(seekTime);
-    if (playerRef.current && playerRef.current.seekTo) {
-      playerRef.current.seekTo(seekTime, true);
+    if (audioRef.current) {
+      audioRef.current.currentTime = seekTime;
     }
   };
 
   // Volume toggle
   const handleToggleMute = () => {
     soundFx.playClick();
-    if (isMuted) {
-      setIsMuted(false);
-      if (playerRef.current && playerRef.current.unMute) playerRef.current.unMute();
-      if (playerRef.current && playerRef.current.setVolume) playerRef.current.setVolume(volume);
-    } else {
-      setIsMuted(true);
-      if (playerRef.current && playerRef.current.mute) playerRef.current.mute();
-    }
+    setIsMuted(!isMuted);
+  };
+
+  const handleVolumeChange = (e) => {
+    const newVol = Number(e.target.value);
+    setVolume(newVol);
+    if (isMuted) setIsMuted(false);
   };
 
   const formatTime = (seconds) => {
-    if (isNaN(seconds)) return "0:00";
+    if (isNaN(seconds) || seconds === null) return "0:00";
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
     return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
@@ -196,16 +155,13 @@ export default function MusicPlayer({ isPlaying, setIsPlaying, currentTrack, set
 
   return (
     <>
-      {/* Hidden YouTube Iframe Player container */}
-      <div className="pointer-events-none fixed -left-[9999px] -top-[9999px] h-1 w-1 opacity-0 overflow-hidden">
-        <div id="yt-audio-player"></div>
-      </div>
-
       {/* Saloon.wtf inspired Floating Bottom Glass Capsule Player */}
       <div className="fixed bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 z-40 w-[94vw] max-w-xl pointer-events-auto">
-        <div className="group relative flex items-center gap-3 sm:gap-4 rounded-full p-2.5 sm:p-3 pr-4 sm:pr-5 bg-white/10 backdrop-blur-2xl backdrop-saturate-150 border border-white/20 shadow-[0_8px_40px_rgba(0,0,0,0.45),inset_0_1px_0_rgba(255,255,255,0.25)] transition-all hover:border-white/30 hover:bg-white/[0.12]">
+        <div className={`group relative flex items-center gap-3 sm:gap-4 rounded-full p-2.5 sm:p-3 pr-4 sm:pr-5 bg-white/10 backdrop-blur-2xl backdrop-saturate-150 border border-white/20 shadow-[0_8px_40px_rgba(0,0,0,0.45),inset_0_1px_0_rgba(255,255,255,0.25)] transition-all hover:border-white/30 hover:bg-white/[0.12] ${
+          isPlaying ? 'shadow-[0_8px_40px_rgba(255,153,51,0.25)] border-orange-400/30' : ''
+        }`}>
           
-          {/* Rotating Vinyl Disc with Center Spindle (Exact Saloon.wtf design) */}
+          {/* Rotating Vinyl Disc with Center Spindle */}
           <div className="relative h-14 w-14 sm:h-16 sm:w-16 shrink-0">
             <div 
               className="h-full w-full overflow-hidden rounded-full shadow-lg ring-1 ring-white/20 cursor-pointer"
@@ -284,7 +240,7 @@ export default function MusicPlayer({ isPlaying, setIsPlaying, currentTrack, set
               type="button" 
               onClick={handlePrevTrack}
               aria-label="Previous track" 
-              className="grid h-8 w-8 sm:h-9 sm:w-9 place-items-center rounded-full text-white/80 transition hover:bg-white/15 hover:text-white active:scale-95"
+              className="grid h-8 w-8 sm:h-9 sm:w-9 place-items-center rounded-full text-white/80 transition hover:bg-white/15 hover:text-white active:scale-95 cursor-pointer"
             >
               <SkipBack className="w-4 h-4" />
             </button>
@@ -294,7 +250,7 @@ export default function MusicPlayer({ isPlaying, setIsPlaying, currentTrack, set
               type="button" 
               onClick={handleTogglePlay}
               aria-label={isPlaying ? "Pause music" : "Play patriotic music"} 
-              className="grid h-10 w-10 sm:h-11 sm:w-11 place-items-center rounded-full bg-white text-black shadow-lg transition hover:scale-105 active:scale-95"
+              className="grid h-10 w-10 sm:h-11 sm:w-11 place-items-center rounded-full bg-white text-black shadow-lg transition hover:scale-105 active:scale-95 cursor-pointer"
             >
               {isPlaying ? (
                 <Pause className="w-5 h-5 fill-current" />
@@ -308,17 +264,48 @@ export default function MusicPlayer({ isPlaying, setIsPlaying, currentTrack, set
               type="button" 
               onClick={handleNextTrack}
               aria-label="Next track" 
-              className="grid h-8 w-8 sm:h-9 sm:w-9 place-items-center rounded-full text-white/80 transition hover:bg-white/15 hover:text-white active:scale-95"
+              className="grid h-8 w-8 sm:h-9 sm:w-9 place-items-center rounded-full text-white/80 transition hover:bg-white/15 hover:text-white active:scale-95 cursor-pointer"
             >
               <SkipForward className="w-4 h-4" />
             </button>
+
+            {/* Volume Control / Toggle */}
+            <div className="relative hidden sm:block">
+              <button 
+                type="button"
+                onClick={handleToggleMute}
+                onMouseEnter={() => setShowVolumeSlider(true)}
+                aria-label="Volume toggle" 
+                className="grid h-8 w-8 place-items-center rounded-full text-white/80 transition hover:bg-white/15 hover:text-white active:scale-95 cursor-pointer"
+              >
+                {isMuted ? <VolumeX className="w-4 h-4 text-orange-400" /> : <Volume2 className="w-4 h-4" />}
+              </button>
+
+              {/* Hover Volume Slider popover */}
+              {showVolumeSlider && (
+                <div 
+                  className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 p-2 bg-[#0e1219]/95 border border-white/20 rounded-xl shadow-xl backdrop-blur-xl flex flex-col items-center gap-1 z-50 animate-in fade-in zoom-in-95 duration-150"
+                  onMouseLeave={() => setShowVolumeSlider(false)}
+                >
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    value={isMuted ? 0 : volume}
+                    onChange={handleVolumeChange}
+                    className="w-20 h-1 accent-orange-400 cursor-pointer"
+                  />
+                  <span className="text-[10px] font-mono text-white/70">{isMuted ? 0 : volume}%</span>
+                </div>
+              )}
+            </div>
 
             {/* Playlist Drawer Button */}
             <button 
               type="button" 
               onClick={() => { soundFx.playClick(); setIsDrawerOpen(true); }}
               aria-label="Open playlist drawer" 
-              className="grid h-8 w-8 sm:h-9 sm:w-9 place-items-center rounded-full text-white/80 transition hover:bg-white/15 hover:text-white active:scale-95"
+              className="grid h-8 w-8 sm:h-9 sm:w-9 place-items-center rounded-full text-white/80 transition hover:bg-white/15 hover:text-white active:scale-95 cursor-pointer"
               title="View Desh Bhakti Playlist"
             >
               <ListMusic className="w-4 h-4" />

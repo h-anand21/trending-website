@@ -4,17 +4,17 @@ import QuoteRotator from './QuoteRotator';
 import { HandwrittenPostcard, CentralMemoryCard } from './MemoryPostcard';
 import { soundFx } from '../utils/soundEffects';
 
-export default function Hero({ isVideoMuted, onTriggerSalute }) {
+export default function Hero({ onTriggerSalute }) {
   return (
     <section id="hero" className="relative min-h-screen w-full flex flex-col items-center justify-between pt-24 sm:pt-28 pb-32 sm:pb-36 px-4 sm:px-6 overflow-hidden">
       
-      {/* 1. Cinematic Background Video Layer (HTML5 Video) */}
+      {/* 1. Cinematic Background Video Layer (HTML5 Video, Always Muted Permanently) */}
       <div className="fixed inset-0 -z-20 w-full h-full bg-black overflow-hidden pointer-events-none">
         <video
           src="/video.mp4"
           autoPlay
           loop
-          muted={isVideoMuted}
+          muted
           playsInline
           className="w-full h-full object-cover scale-105 filter brightness-90 contrast-105"
         />
